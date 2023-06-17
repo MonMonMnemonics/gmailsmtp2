@@ -1,54 +1,35 @@
-import { QMainWindow, QWidget, QLabel, FlexLayout, QBoxLayout, QPushButton, QLineEdit, EchoMode, QTableWidget, QTableWidgetItem, ItemFlag } from '@nodegui/nodegui';
+import { QMainWindow } from '@nodegui/nodegui';
+import { EventEmitter } from "events"
+import { createTransport } from "nodemailer"
 
-const nm = require("nodemailer");
-const fs = require("fs");
-const fsp = require("fs/promises");
-const csv = require("csv-parser");
+import * as loginMenu from "./login"
+import * as dataMenu from "./data";
 
-const config = require("./config.json");
-const tp = nm.createTransport(config.transportConfig);
-let results: any[] = [];
+let tp = createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  tls: {
+      rejectUnauthorized: false
+  },
+});
 
+function newTransport(user: string, pass: string) {
+  tp = createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      tls: {
+          rejectUnauthorized: false
+      },
+      auth: {
+          user: user,
+          pass: pass
+      }
+  })
+}
+
+const slotRep = new EventEmitter();
 const win = new QMainWindow();
 win.setWindowTitle("Gmail auto-sender");
-win.resize(800, 600);
-
-const centralWidget = new QWidget();
-centralWidget.setObjectName("mainPanel");
-const mainWindow = new FlexLayout();
-centralWidget.setLayout(mainWindow);
-
-const label = new QLabel();
-label.setObjectName("label");
-label.setText("Alamat Email: ");
-mainWindow.addWidget(label);
-
-const addressInput = new QLineEdit();
-mainWindow.addWidget(addressInput);
-
-const label2 = new QLabel();
-label2.setObjectName("label");
-label2.setText("Alamat Email: ");
-label2.setText("App Password: ");
-mainWindow.addWidget(label2);
-
-const passInput = new QLineEdit();
-passInput.setEchoMode(EchoMode.Password);
-mainWindow.addWidget(passInput);
-
-const button = new QPushButton();
-button.setText("Test");
-button.addEventListener("clicked", () => {
-  addressInput.setText("");
-  passInput.setText("");
-})
-mainWindow.addWidget(button);
-
-const table = new QTableWidget(3, 3);
-table.setObjectName("table");
-mainWindow.addWidget(table);
-
-win.setCentralWidget(centralWidget);
 win.setStyleSheet(
   `
     #mainPanel {
@@ -61,6 +42,11 @@ win.setStyleSheet(
       font-size: 16px;
       font-weight: bold;
     }
+    #checkBox {
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: bold;
+    }
     #table {
       width: "100%";
       height: "80%";
@@ -71,83 +57,38 @@ win.show();
 
 (global as any).win = win;
 
-fs.createReadStream('target.csv')
-.pipe(csv())
-.on('data', (data: Object) => results.push({
-  ...data,
-  "Status": false,
-}))
-.on('end', () => {
-  table.setColumnCount(Object.keys(results[0]).length)
-  table.setRowCount(0);
-
-  table.setHorizontalHeaderLabels(Object.keys(results[0]));
-
-  results.forEach((e:any) => {
-    table.insertRow(table.rowCount());
-    let i = 0;
-    for (let key in e) {
-      const a = new QTableWidgetItem(e[key]);
-      a.setFlags(a.flags() &~ ItemFlag.ItemIsEditable);
-      table.setItem(table.rowCount() - 1, i++, a);
+slotRep.on("switchMenu", e => {
+  switch (e) {
+    case 0:{
+      loginMenu.init();
+      win.setCentralWidget(loginMenu.centralWidget);
+      win.resize(loginMenu.size[0], loginMenu.size[1]);
+      win.setMinimumSize(loginMenu.size[0], loginMenu.size[1]);
+      break;
     }
-  })
-  //main();
-});
 
-function searchList(target: any, sList: any[]) {
-  for (let i = 0; i < sList.length; i++) {
-    if (sList[i].indexOf(target) == 0) {
-      return i;
+    case 1:{
+      dataMenu.init();
+      win.setCentralWidget(dataMenu.centralWidget);
+      win.resize(dataMenu.size[0], loginMenu.size[1]);
+      win.setMinimumSize(dataMenu.size[0], dataMenu.size[1]);
+      break;
     }
-  }
-  return -1;
-}
 
-async function main() {    
-  await tp.verify();
-  const AttList = await fsp.readdir("./attachment");
-  let temp = "";
-
-  try {
-    temp = (await fsp.readFile("./template.txt")).toString();
-  } catch (err) {
-    console.log("GAGAL LOAD TEMPLATE EMAIL");
-    console.log(err);
-    return;
+    default:{
+      loginMenu.init();
+      win.setCentralWidget(loginMenu.centralWidget);
+      win.resize(loginMenu.size[0], loginMenu.size[1]);
+      win.setMinimumSize(loginMenu.size[0], loginMenu.size[1]);
+      break;
+    }    
   }
+})
 
-  for (let j = 0; j < results.length; j++) {
-    const idx = searchList(results[j]["First Name"], AttList);
-    if (idx == -1) {
-      await fsp.appendFile("./log.txt", "ATTACHMENT " + results[j]["First Name"] + " TIDAK DITEMUKAN\n");
-      console.log("ATTACHMENT " + results[j]["First Name"] + " TIDAK DITEMUKAN")
-      return;
-    } else {
-      let emailText = JSON.parse(JSON.stringify(temp));
-      Object.keys(results[j]).forEach(e => {
-        emailText = emailText.replaceAll("<{" + e + "}>", results[j][e]);
-      })
-      
-      try {
-        console.log("MENGIRIM " + results[j]["First Name"]);
-        await tp.sendMail({
-          from: '"' + config.emailConfig.nama + '" <' + config.transportConfig.auth.user + '>',
-          to: results[j]["Email Address"],
-          subject: config.emailConfig.judul,
-          text: emailText,
-          attachments: [{
-            path: "./attachment/" + AttList[idx]
-          }]
-        })  
-        console.log("TERKIRIM " + results[j]["First Name"]);
-        await fsp.appendFile("./log.txt", "TERKIRIM " + results[j]["First Name"] + "\n");
-      } catch (err) {
-        console.log("ERROR PENGIRIMAN " + results[j]["First Name"]);
-        console.log(err); 
-        await fsp.appendFile("./log.txt", "ERROR PENGIRIMAN " + results[j]["First Name"] + "\n");
-        return;     
-      }    
-    }      
-  }
-}
+slotRep.emit("switchMenu", 0);
+
+export {
+  tp,
+  newTransport,
+  slotRep
+};
