@@ -3,8 +3,8 @@ import { tp, newTransport, slotRep } from "./index";
 import { readFile, writeFile } from "fs/promises"
 import * as crypto from "crypto"
 
-const cryptoKey = crypto.createHash("sha512").update("12345").digest("hex").substring(0, 32);
-const cryptoIV = crypto.createHash("sha512").update("zxcvd").digest("hex").substring(0, 16);
+const cryptoKey = crypto.createHash("sha512").update("").digest("hex").substring(0, 32);
+const cryptoIV = crypto.createHash("sha512").update("").digest("hex").substring(0, 16);
 
 const centralWidget = new QWidget();
 centralWidget.setObjectName("mainPanel");

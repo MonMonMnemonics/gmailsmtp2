@@ -5,6 +5,7 @@ import { createTransport } from "nodemailer"
 import * as loginMenu from "./login"
 import * as dataMenu from "./data";
 import * as attachmentMenu from "./attachment";
+import * as templateMenu from "./template";
 
 let tp = createTransport({
   host: "smtp.gmail.com",
@@ -53,6 +54,11 @@ win.setStyleSheet(
       margin-bottom: 7px;
       flex-grow: 1;
     }
+    #list {
+      width: "100%";
+      margin-bottom: 7px;
+      flex-grow: 1;
+    }
   `
 );
 win.show();
@@ -62,26 +68,34 @@ win.show();
 slotRep.on("switchMenu", e => {
   switch (e) {
     case 0:{
-      loginMenu.init();
       win.setMinimumSize(loginMenu.size[0], loginMenu.size[1]);
       win.setCentralWidget(loginMenu.centralWidget);
       win.resize(loginMenu.size[0], loginMenu.size[1]);
+      loginMenu.init();
       break;
     }
 
     case 1:{
-      dataMenu.init();
       win.setMinimumSize(dataMenu.size[0], dataMenu.size[1]);
       win.setCentralWidget(dataMenu.centralWidget);
       win.resize(dataMenu.size[0], dataMenu.size[1]);
+      dataMenu.init();
       break;
     }
 
     case 2:{
-      attachmentMenu.init();
       win.setMinimumSize(attachmentMenu.size[0], attachmentMenu.size[1]);
       win.setCentralWidget(attachmentMenu.centralWidget);
       win.resize(attachmentMenu.size[0], attachmentMenu.size[1]);
+      attachmentMenu.init();
+      break;
+    }
+
+    case 3:{
+      win.setMinimumSize(templateMenu.size[0], templateMenu.size[1]);
+      win.setCentralWidget(templateMenu.centralWidget);
+      win.resize(templateMenu.size[0], templateMenu.size[1]);
+      templateMenu.init();
       break;
     }
 
@@ -95,7 +109,7 @@ slotRep.on("switchMenu", e => {
   }
 })
 
-slotRep.emit("switchMenu", 2);
+slotRep.emit("switchMenu", 1);
 
 let targetData: any[] = [];
 function setTargetData(dt: any[]) {
