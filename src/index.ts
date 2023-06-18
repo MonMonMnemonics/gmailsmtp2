@@ -4,6 +4,7 @@ import { createTransport } from "nodemailer"
 
 import * as loginMenu from "./login"
 import * as dataMenu from "./data";
+import * as attachmentMenu from "./attachment";
 
 let tp = createTransport({
   host: "smtp.gmail.com",
@@ -49,7 +50,8 @@ win.setStyleSheet(
     }
     #table {
       width: "100%";
-      height: "80%";
+      margin-bottom: 7px;
+      flex-grow: 1;
     }
   `
 );
@@ -61,34 +63,54 @@ slotRep.on("switchMenu", e => {
   switch (e) {
     case 0:{
       loginMenu.init();
+      win.setMinimumSize(loginMenu.size[0], loginMenu.size[1]);
       win.setCentralWidget(loginMenu.centralWidget);
       win.resize(loginMenu.size[0], loginMenu.size[1]);
-      win.setMinimumSize(loginMenu.size[0], loginMenu.size[1]);
       break;
     }
 
     case 1:{
       dataMenu.init();
-      win.setCentralWidget(dataMenu.centralWidget);
-      win.resize(dataMenu.size[0], loginMenu.size[1]);
       win.setMinimumSize(dataMenu.size[0], dataMenu.size[1]);
+      win.setCentralWidget(dataMenu.centralWidget);
+      win.resize(dataMenu.size[0], dataMenu.size[1]);
+      break;
+    }
+
+    case 2:{
+      attachmentMenu.init();
+      win.setMinimumSize(attachmentMenu.size[0], attachmentMenu.size[1]);
+      win.setCentralWidget(attachmentMenu.centralWidget);
+      win.resize(attachmentMenu.size[0], attachmentMenu.size[1]);
       break;
     }
 
     default:{
       loginMenu.init();
+      win.setMinimumSize(loginMenu.size[0], loginMenu.size[1]);
       win.setCentralWidget(loginMenu.centralWidget);
       win.resize(loginMenu.size[0], loginMenu.size[1]);
-      win.setMinimumSize(loginMenu.size[0], loginMenu.size[1]);
       break;
     }    
   }
 })
 
-slotRep.emit("switchMenu", 0);
+slotRep.emit("switchMenu", 2);
+
+let targetData: any[] = [];
+function setTargetData(dt: any[]) {
+  targetData = JSON.parse(JSON.stringify(dt));
+}
+
+let attachmentList: any[] = [];
+function setAttachmentList(dt: any[]) {
+  attachmentList = JSON.parse(JSON.stringify(dt));
+}
 
 export {
   tp,
   newTransport,
-  slotRep
+  slotRep,
+  setAttachmentList,
+  setTargetData
 };

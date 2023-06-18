@@ -1,6 +1,7 @@
 import { QWidget, QLabel, FlexLayout, QPushButton, QTableWidget, AlignmentFlag, QTableWidgetItem, ItemFlag, QFileDialog, FileMode } from '@nodegui/nodegui';
-import { slotRep, setTargetData } from "./index";
+import { slotRep } from "./index";
 import { writeFile } from "fs/promises";
+import { createReadStream, existsSync } from "fs";
 
 import * as xlsx from "xlsx";
 import * as fs from "fs";
@@ -46,10 +47,7 @@ topWindow.addWidget(button3);
 const button2 = new QPushButton();
 button2.setObjectName("button");
 button2.setText("Next");
-button2.addEventListener("clicked", () => {
-  setTargetData(results);
-  slotRep.emit("switchMenu", 2);
-});
+button2.addEventListener("clicked", () => {slotRep.emit("switchMenu", 2);});
 topWindow.addWidget(button2);
 
 const table = new QTableWidget(3, 3);
