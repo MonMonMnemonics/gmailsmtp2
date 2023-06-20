@@ -10,7 +10,10 @@
     "strict": true,
     "alwaysStrict": true,
     "moduleResolution": "node",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "lib": [
+      "ES2021.String"
+    ],  
   },
   "include": ["**/*"]
 }

@@ -23,6 +23,15 @@ button.setText("Back");
 button.addEventListener("clicked", () => {slotRep.emit("switchMenu", 1);});
 topWindow.addWidget(button);
 
+const button4 = new QPushButton();
+button4.setObjectName("button");
+button4.setText("Reset");
+button4.addEventListener("clicked", () => {
+  results = [];
+  listWidget.clear();
+});
+topWindow.addWidget(button4);
+
 const label = new QLabel();
 label.setObjectName("label");
 label.setText("");
@@ -52,6 +61,7 @@ label2.setObjectName("label");
 label2.setText("Daftar file lampiran");
 label2.setStyleSheet(`
   height: 18px;
+  margin-bottom: 4px;
 `);
 label2.setAlignment(AlignmentFlag.AlignCenter);
 mainWindow.addWidget(label2);
@@ -83,7 +93,7 @@ async function openFile() {
 }
 
 function init() {
-  label.setText("Klik tombol muat lampiran untuk memulai --->");
+  label.setText("Klik tombol muat lampiran untuk memuat lampiran --->");
 }
 
 const size = [800, 600];
