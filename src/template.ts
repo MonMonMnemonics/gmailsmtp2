@@ -1,16 +1,11 @@
 import { QWidget, QLabel, FlexLayout, QPushButton, AlignmentFlag, QFileDialog, FileMode, QTextEdit, QComboBox, QLineEdit, QListWidget, QListWidgetItem, WrapMode, } from '@nodegui/nodegui';
-import { slotRep, targetData, attachmentList } from "./index";
+import { slotRep, targetData, attachmentList, setConfigObj } from "./index";
 import { readFile } from "fs/promises";
 
 const centralWidget = new QWidget();
 centralWidget.setObjectName("mainPanel");
 const mainWindow = new FlexLayout();
 centralWidget.setLayout(mainWindow);
-
-let title: string = "";
-let content: string = "";
-let atasNama: string = "";
-let attachmentCol: string = "";
 
 const topWidget = new QWidget();
 topWidget.setInlineStyle(`
@@ -47,7 +42,11 @@ const button2 = new QPushButton();
 button2.setObjectName("button");
 button2.setText("Next");
 button2.addEventListener("clicked", () => {
-    slotRep.emit("switchMenu", 4);
+  setConfigObj("atasNama", inptAtasNama.text());
+  setConfigObj("title", inptSubject.text());
+  setConfigObj("content", contentText.toPlainText());
+  setConfigObj("attachmentCol", comboAttachment.currentIndex().toString());
+  slotRep.emit("switchMenu", 4);
 });
 topWindow.addWidget(button2);
 
@@ -63,6 +62,7 @@ mainWindow.addWidget(middleWidget);
 
 //-------------------------------   LEFT WIDGET   -------------------------------
 const leftWidget = new QWidget();
+leftWidget.setObjectName("leftWidget");
 leftWidget.setInlineStyle(`
   flex-grow: 1;
   align-self: stretch;
@@ -75,7 +75,7 @@ leftWidget.setLayout(leftWindow);
 middleWindow.addWidget(leftWidget);
 
 const labelTitle = new QLabel();
-labelTitle.setText("Mengirim atas nama :");
+labelTitle.setText("Pengirim :");
 labelTitle.setObjectName("label");
 labelTitle.setWordWrap(true);
 leftWindow.addWidget(labelTitle);
@@ -136,6 +136,7 @@ function reloadAttachmentList() {
       }
     })
   }
+  labelAttachmentR.setText("Daftar file lampiran : (" + attachmentListView.count() + " file)");
 }
 
 function updateAtasNama() {
@@ -143,7 +144,7 @@ function updateAtasNama() {
   for (let idx = 0; idx < targetData[0].length; idx++) {
     t = t.replaceAll("<{" + targetData[0][idx] + "}>", targetData[currentRow + 1][idx]);
   }
-  labelTitleR.setText("Mengirim atas nama : " + t);
+  labelTitleR.setText("Pengirim : " + t);
 }
 
 function updateSubject() {
@@ -151,7 +152,7 @@ function updateSubject() {
   for (let idx = 0; idx < targetData[0].length; idx++) {
     t = t.replaceAll("<{" + targetData[0][idx] + "}>", targetData[currentRow + 1][idx]);
   }
-  labelSubjectR.setText("Judul email : " + t);
+  labelSubjectR.setText("Subject : " + t);
 }
 
 function updateContent() {
@@ -166,9 +167,11 @@ function reloadLabelsData() {
   updateAtasNama();
   updateSubject();
   updateContent();
+  labelDataset.setText("Preview Email\n(Data baris " + (currentRow + 1) + ")");
 }
 //-------------------------------   RIGHT WIDGET   -------------------------------
 const rightWidget = new QWidget();
+rightWidget.setObjectName("rightWidget");
 rightWidget.setInlineStyle(`
   flex-grow: 1;
   align-self: stretch;
@@ -246,7 +249,7 @@ rightWindow.addWidget(resultText);
 const labelAttachmentR = new QLabel();
 labelAttachmentR.setObjectName("label");
 labelAttachmentR.setText("Daftar file lampiran :");
-labelAttachment.setWordWrap(true);
+labelAttachmentR.setWordWrap(true);
 rightWindow.addWidget(labelAttachmentR);
 const attachmentListView = new QListWidget();
 attachmentListView.setObjectName("attachmentList");
@@ -266,7 +269,7 @@ async function openFile() {
 }
 
 function init() {
-  label.setText("Klik tombol muat template untuk memulai --->");
+  label.setText("Klik tombol muat template untuk memmuat file template --->");
   if (targetData.length > 0) {
     targetData[0].forEach((e: any) => {
      comboAttachment.addItem(undefined, String(e));

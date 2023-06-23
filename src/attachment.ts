@@ -51,7 +51,12 @@ const button2 = new QPushButton();
 button2.setObjectName("button");
 button2.setText("Next");
 button2.addEventListener("clicked", () => {
-    setAttachmentList(results);
+    setAttachmentList(results.map(e => {
+      return{
+          dir: e,
+          name: e.split("/").pop()?.trim()
+      }
+    }));
     slotRep.emit("switchMenu", 3);
 });
 topWindow.addWidget(button2);
@@ -84,10 +89,9 @@ async function openFile() {
     listWidget.addItem(a);
   }
 
-  results = files.map(e => {
-    return{
-        dir: e,
-        name: e.split("/").pop()?.trim()
+  files.forEach(e => {
+    if (results.indexOf(e) == -1) {
+      results.push(e);
     }
   });
 }

@@ -6,6 +6,7 @@ import * as loginMenu from "./login"
 import * as dataMenu from "./data";
 import * as attachmentMenu from "./attachment";
 import * as templateMenu from "./template";
+import * as sendingMenu from "./sending";
 
 let tp = createTransport({
   host: "smtp.gmail.com",
@@ -15,32 +16,19 @@ let tp = createTransport({
   },
 });
 
-let targetData: any[] = [
-  ["A1", "A2", "A3", "A4"],
-  ["B1", "B2", "B3", "B4"],
-  ["C1", "C2", "C3", "C4"],
-  ["D1", "D2", "D3", "D4"],
-  ["E1", "E2", "E3", "E4"],
-];
+let targetData: any[] = [];
 function setTargetData(dt: any[]) {
   targetData = JSON.parse(JSON.stringify(dt));
 }
 
-let attachmentList: any[] = [
-  {dir: "", name:"asdf"},
-  {dir: "", name:"B2_xzcv"},
-  {dir: "", name:"B3_sadf"},
-  {dir: "", name:"B2_reqw"},
-  {dir: "", name:"asdf"},
-  {dir: "", name:"B1_rewt"},
-];
+let attachmentList: any[] = [];
 function setAttachmentList(dt: any[]) {
   attachmentList = JSON.parse(JSON.stringify(dt));
 }
 
-let config: any;
+let config: any = {};
 function setConfigObj(key: string, val: string) {
-  if (["title", "content", "attachmentCol", "atasNama"].indexOf(key) != -1) {
+  if (["title", "content", "attachmentCol", "atasNama", "user"].indexOf(key) != -1) {
     config[key] = val;
   }
 }
@@ -104,6 +92,12 @@ win.setStyleSheet(
     #attachmentList {
       height: 60px;
     }
+    #leftWidget {
+      width: 100%;
+    }
+    #rightWidget {
+      width: 100%;
+    }
   `
 );
 
@@ -112,6 +106,7 @@ stackedMenu.addWidget(loginMenu.centralWidget);
 stackedMenu.addWidget(dataMenu.centralWidget);
 stackedMenu.addWidget(attachmentMenu.centralWidget);
 stackedMenu.addWidget(templateMenu.centralWidget);
+stackedMenu.addWidget(sendingMenu.centralWidget);
 win.setCentralWidget(stackedMenu);
 
 win.show();
@@ -152,6 +147,14 @@ slotRep.on("switchMenu", e => {
       break;
     }
 
+    case 4:{
+      win.setMinimumSize(sendingMenu.size[0], sendingMenu.size[1]);
+      stackedMenu.setCurrentIndex(4);
+      win.resize(sendingMenu.size[0], sendingMenu.size[1]);
+      sendingMenu.init();
+      break;
+    }
+
     default:{
       win.setMinimumSize(loginMenu.size[0], loginMenu.size[1]);
       stackedMenu.setCurrentIndex(0);
@@ -162,7 +165,7 @@ slotRep.on("switchMenu", e => {
   }
 })
 
-slotRep.emit("switchMenu", 3);
+slotRep.emit("switchMenu", 0);
 
 export {
   tp,

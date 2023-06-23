@@ -110,10 +110,6 @@ async function openFile() {
       }
     }
 
-    if (columnList.indexOf("Status Kirim") == -1) {
-      columnList.push("Status Kirim");
-    }
-
     dataBulk.map(e => {
       while (e.length < columnList.length) {
         e.push("");

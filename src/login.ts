@@ -1,5 +1,5 @@
 import { QWidget, QLabel, FlexLayout, QPushButton, QLineEdit, EchoMode, TextInteractionFlag, AlignmentFlag, QCheckBox, CheckState } from '@nodegui/nodegui';
-import { tp, newTransport, slotRep } from "./index";
+import { tp, newTransport, slotRep, setConfigObj } from "./index";
 import { readFile, writeFile } from "fs/promises"
 import * as crypto from "crypto"
 
@@ -101,12 +101,14 @@ function loginClick() {
         pass: passInput.text()
       }), "utf8", "hex") + encryptor.final("hex")).toString('utf8');
       writeFile("configTransport", a, "utf8").then(e => {
+        setConfigObj("user", addressInput.text());
         slotRep.emit("switchMenu", 1);
         label4.setText("");
         addressInput.setText("");
         passInput.setText("");
       }).catch(e => {});
     } else {
+      setConfigObj("user", addressInput.text());
       slotRep.emit("switchMenu", 1);
       label4.setText("");
       addressInput.setText("");
